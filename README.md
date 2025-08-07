@@ -14,7 +14,11 @@
 ### 1. Запуск через Docker
 
 `git clone https://github.com/ваш-репозиторий.git`
+
+
 ``cd wallet-service``
+
+
 ```docker-compose up --build```
 
 ## 2. Примеры команд. 
