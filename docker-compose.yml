@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  wallet-app:
+    build: .
+    image: wallet-service:0.0.1-SNAPSHOT  # имя образа из Jib
+    container_name: wallet-app
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # Основные настройки
+      APP_NAME: "Wallet Production"
+      # Настройки БД
+      DB_HOST: wallet-db
+      DB_PORT: "5432"
+      DB_NAME: wallet_db
+      DB_USER: admin
+      DB_PASSWORD: secret
+      DB_POOL_SIZE: 50  # Можем менять без пересборки!
+      DB_TIMEOUT: 5000
+      # Liquibase
+      LIQUIBASE_ENABLED: "true"
+
+      # Другие параметры
+      SERVER_PORT: 8080
+      LOG_LEVEL: INFO
+    ports:
+      - "8080:8080"
+    depends_on:
+      wallet-db:
+        condition: service_healthy
+    networks:
+      - wallet-network
+
+  wallet-db:
+    image: postgres:14.13
+    container_name: wallet-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: wallet_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d wallet_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - wallet-network
+    ports:
+      - "5432:5432"
+volumes:
+  pgdata:
+
+networks:
+  wallet-network:
+    driver: bridge
